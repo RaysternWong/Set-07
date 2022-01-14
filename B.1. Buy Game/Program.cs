@@ -75,7 +75,7 @@ namespace BuyGame
          */
         public static List<Student> GetListBuyers(List<Student> students, double gamePrice)
         {
-            List<Student> studentsAfforded = students.Where(x => x.AvailableMoney > gamePrice).ToList();
+            List<Student> studentsAfforded = students.Where(x => x.AvailableMoney >= gamePrice).ToList();
             List<Student> buyers = new List<Student>();
 
             foreach(Student potentialBuyer in studentsAfforded)
@@ -113,7 +113,7 @@ namespace BuyGame
          */
         public static List<Student> GetListPromoBuyers(List<Student> students, double gamePrice)
         {
-            List<Student> studentsAfforded = students.Where(x => x.AvailableMoney > gamePrice).ToList();
+            List<Student> studentsAfforded = students.Where(x => x.AvailableMoney >= gamePrice).ToList();
             List<Student> buyers = new List<Student>();
             List<Student> invitedList = new List<Student>();
             double discountedPrice = gamePrice / 2;
@@ -125,26 +125,21 @@ namespace BuyGame
                                        join studentAfforded in studentsAfforded on friend equals studentAfforded
                                        select friend).ToList();
 
-                if (friendsAfforded.Count >= 2)
-                {
-                    buyers.Add(potentialBuyer);
-                }
-                if (friendsAfforded.Count == 1)
+                if (friendsAfforded.Count >= 1)
                 {
                     var friendAffordedHalfPrice = potentialBuyer.Friends
                                                     .Except(friendsAfforded)
                                                     .Except(invitedList)
-                                                    .Where(x => x.AvailableMoney > discountedPrice)
+                                                    .Where(x => x.AvailableMoney >= discountedPrice)
                                                     .OrderBy(x => x.AvailableMoney)
                                                     .FirstOrDefault();
 
                     if(friendAffordedHalfPrice != null)
                     {
-                        invitedList.Add(friendAffordedHalfPrice);
-                        buyers.Add(potentialBuyer);
                         buyers.Add(friendAffordedHalfPrice);
-                    }
-                    
+                        buyers.Add(potentialBuyer);
+                        invitedList.Add(friendAffordedHalfPrice);          
+                    }            
                 }
             }
 
