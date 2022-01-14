@@ -75,11 +75,22 @@ namespace BuyGame
          */
         public static List<Student> GetListBuyers(List<Student> students, double gamePrice)
         {
-            // AMEND YOUR CODE BELOW
+            List<Student> studentsAfforded = students.Where(x => x.AvailableMoney > gamePrice).ToList();
+            List<Student> buyers = new List<Student>();
 
-            throw new NotImplementedException();
+            foreach(Student potentialBuyer in studentsAfforded)
+            {
+                var friendsAfforded =  (from friend in potentialBuyer.Friends
+                                       join studentAfforded in studentsAfforded on friend equals studentAfforded
+                                       select friend).ToList();
 
-            // AMEND YOUR CODE ABOVE
+                if(friendsAfforded.Count >= 2)
+                {
+                    buyers.Add(potentialBuyer);
+                }                              
+            }
+
+            return buyers;
         }
 
         /**
@@ -102,11 +113,42 @@ namespace BuyGame
          */
         public static List<Student> GetListPromoBuyers(List<Student> students, double gamePrice)
         {
-            // AMEND YOUR CODE BELOW
+            List<Student> studentsAfforded = students.Where(x => x.AvailableMoney > gamePrice).ToList();
+            List<Student> buyers = new List<Student>();
+            List<Student> invitedList = new List<Student>();
+            double discountedPrice = gamePrice / 2;
 
-            throw new NotImplementedException();
+ 
+            foreach (Student potentialBuyer in studentsAfforded)
+            {
+                var friendsAfforded = (from friend in potentialBuyer.Friends
+                                       join studentAfforded in studentsAfforded on friend equals studentAfforded
+                                       select friend).ToList();
 
-            // AMEND YOUR CODE ABOVE
+                if (friendsAfforded.Count >= 2)
+                {
+                    buyers.Add(potentialBuyer);
+                }
+                if (friendsAfforded.Count == 1)
+                {
+                    var friendAffordedHalfPrice = potentialBuyer.Friends
+                                                    .Except(friendsAfforded)
+                                                    .Except(invitedList)
+                                                    .Where(x => x.AvailableMoney > discountedPrice)
+                                                    .OrderBy(x => x.AvailableMoney)
+                                                    .FirstOrDefault();
+
+                    if(friendAffordedHalfPrice != null)
+                    {
+                        invitedList.Add(friendAffordedHalfPrice);
+                        buyers.Add(potentialBuyer);
+                        buyers.Add(friendAffordedHalfPrice);
+                    }
+                    
+                }
+            }
+
+            return buyers;
         }
 
         #region Test Case
