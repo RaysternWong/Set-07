@@ -80,29 +80,34 @@ namespace LessThanColoring
         {
             int days = 0;
 
-            List<Node> visitedNodes = new List<Node>() {};
-            List<Node> nextDayNodes = GetNextDayNodes(startNode, visitedNodes);
+            List<Node> passedNodes = new List<Node>() {};
+            List<Node> tomorrowNodes = GetTomorrowNodes(startNode, passedNodes);
 
-            while (nextDayNodes?.Count > 0)
+            while (tomorrowNodes?.Count > 0)
             {
                 days++;
-
-                visitedNodes.AddRange(nextDayNodes);
-                List<Node> temp = new List<Node>();
-
-                foreach (Node node in nextDayNodes)
-                {
-                    temp.AddRange(GetNextDayNodes(node, visitedNodes));
-                }
-                nextDayNodes = temp;
+                passedNodes.AddRange(tomorrowNodes);
+                tomorrowNodes = GetTomorrowNodes(tomorrowNodes, passedNodes);
             }
 
             return days;
         }
 
-        private static List<Node> GetNextDayNodes(Node node, List<Node> visitedNodes)
+        private static List<Node> GetTomorrowNodes(List<Node> todayNodes, List<Node> passedNodes)
         {
-            return node.Neighbours.Except(visitedNodes).Where(n => n.Power <= node.Power).ToList();
+            List<Node> tomorrowNodes = new List<Node>();
+
+            foreach (Node node in todayNodes)
+            {
+                tomorrowNodes.AddRange(GetTomorrowNodes(node, passedNodes));
+            }
+ 
+            return tomorrowNodes;
+        }
+
+        private static List<Node> GetTomorrowNodes(Node node, List<Node> passedNodes)
+        {
+            return node.Neighbours.Except(passedNodes).Where(n => n.Power <= node.Power).ToList();
         }
 
         /**
@@ -133,11 +138,74 @@ namespace LessThanColoring
          */
         public static Color FindMostColor(Node node1, Node node2, int coloringDuration)
         {
-            // AMEND YOUR CODE BELOW THIS LINE
+            List<Node> passedNodesFrom1 = new List<Node>() { };
+            List<Node> passedNodesFrom2 = new List<Node>() { };
 
-            throw new NotImplementedException();
 
-            // AMEND YOUR CODE ABOVE THIS LINE
+            List<Node> tomorrowNodesFrom1 = GetAndColoringTomorrowNodes(node1, passedNodesFrom1);
+            List<Node> tomorrowNodesFrom2 = GetAndColoringTomorrowNodes(node2, passedNodesFrom2);
+
+            for(int i=1; i < coloringDuration; i++)
+            {       
+                tomorrowNodesFrom1 = GetAndColoringTomorrowNodes(tomorrowNodesFrom1, passedNodesFrom1);
+                passedNodesFrom1.AddRange(tomorrowNodesFrom1);
+
+                tomorrowNodesFrom2 = GetAndColoringTomorrowNodes(tomorrowNodesFrom2, passedNodesFrom2);
+                passedNodesFrom2.AddRange(tomorrowNodesFrom2);
+            }
+
+            passedNodesFrom1.AddRange(passedNodesFrom2);
+
+            Color mostColor = passedNodesFrom1
+                                .GroupBy(n => n.Color)
+                                .OrderByDescending(grp => grp.Count())
+                                .First().Key;
+
+            return mostColor;
+        }
+
+        private static List<Node> GetAndColoringTomorrowNodes(List<Node> todayNodes, List<Node> passedNodes)
+        {
+            List<Node> tomorrowNodes = new List<Node>();
+
+            foreach (Node node in todayNodes)
+            {
+                tomorrowNodes.AddRange(GetAndColoringTomorrowNodes(node, passedNodes));
+            }
+
+            return tomorrowNodes;
+        }
+
+
+        private static List<Node> GetAndColoringTomorrowNodes(Node node, List<Node> passedNodes)
+        {
+            var tomorrowNode = node.Neighbours
+                .Except(passedNodes)
+                .Where(n => n.Power <= node.Power).ToList();
+
+            tomorrowNode.ForEach(n => n.Color = GetNewColor(n.Color, node.Color));
+
+            return tomorrowNode;
+        }
+
+        private static Color GetNewColor(Color currentColor, Color comingColor)
+        {
+            switch(comingColor)
+            {
+                case Color.Blank: 
+                    break;
+                case Color.Mixed:
+                    currentColor = Color.Mixed; 
+                    break;     
+                default: 
+                    if (currentColor != comingColor)
+                    {
+                        currentColor = Color.Mixed;
+                    }
+                    break;
+            }
+
+            return currentColor;
         }
 
         private static List<Node> _GenerateGraphA()
