@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LessThanColoring
 {
@@ -44,6 +45,11 @@ namespace LessThanColoring
             nodeA.Color = Color.Red;
             Console.WriteLine(FindMinimumDays(nodeA));
 
+            var nodeK = _GetNode("Node K", graph);
+            nodeA.Color = Color.Red;
+            Console.WriteLine(FindMinimumDays(nodeK));
+
+
             graph = _GenerateGraphB();
             nodeA = _GetNode("Node A", graph);
             nodeA.Color = Color.Red;
@@ -72,19 +78,32 @@ namespace LessThanColoring
          */
         public static int FindMinimumDays(Node startNode)
         {
-            // AMEND YOUR CODE BELOW THIS LINE
+            int days = 0;
 
-            throw new NotImplementedException();
+            List<Node> visitedNodes = new List<Node>() {};
+            List<Node> nextDayNodes = GetNextDayNodes(startNode, visitedNodes);
 
-            // AMEND YOUR CODE ABOVE THIS LINE
+            while (nextDayNodes?.Count > 0)
+            {
+                days++;
+
+                visitedNodes.AddRange(nextDayNodes);
+                List<Node> temp = new List<Node>();
+
+                foreach (Node node in nextDayNodes)
+                {
+                    temp.AddRange(GetNextDayNodes(node, visitedNodes));
+                }
+                nextDayNodes = temp;
+            }
+
+            return days;
         }
 
-        public List<Node> GetNextDayNodes(Node node)
+        private static List<Node> GetNextDayNodes(Node node, List<Node> visitedNodes)
         {
-            throw new NotImplementedException();
+            return node.Neighbours.Except(visitedNodes).Where(n => n.Power <= node.Power).ToList();
         }
-
-        private static int 
 
         /**
          * If we color 2 nodes at the same time then the color will spread for a certain period of time, find which color colored the most nodes.
