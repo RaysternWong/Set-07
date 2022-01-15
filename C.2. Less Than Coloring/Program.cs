@@ -49,13 +49,41 @@ namespace LessThanColoring
             nodeA.Color = Color.Red;
             Console.WriteLine(FindMinimumDays(nodeK));
 
-
             graph = _GenerateGraphB();
             nodeA = _GetNode("Node A", graph);
             nodeA.Color = Color.Red;
             var nodeZ = _GetNode("Node Z", graph);
             nodeZ.Color = Color.Blue;
             Console.WriteLine(FindMostColor(nodeA, nodeZ, 2));
+
+            graph = _GenerateGraphB();
+            nodeA = _GetNode("Node A", graph);
+            nodeA.Color = Color.Blue;
+            nodeZ = _GetNode("Node Z", graph);
+            nodeZ.Color = Color.Red;
+            Console.WriteLine(FindMostColor(nodeA, nodeZ, 7));
+
+            graph = _GenerateGraphB();
+            var nodeR = _GetNode("Node R", graph);
+            nodeR.Color = Color.Red;
+            var nodeU = _GetNode("Node U", graph);
+            nodeU.Color = Color.Blue;
+            Console.WriteLine(FindMostColor(nodeR, nodeU, 2));
+
+            graph = _GenerateGraphB();
+            nodeR = _GetNode("Node R", graph);
+            nodeR.Color = Color.Blue;
+            nodeZ = _GetNode("Node Z", graph);
+            nodeZ.Color = Color.Red;
+            Console.WriteLine(FindMostColor(nodeR, nodeZ, 2));
+
+
+            graph = _GenerateGraphB();
+            var nodeL = _GetNode("Node L", graph);
+            nodeL.Color = Color.Blue;
+            nodeZ = _GetNode("Node Z", graph);
+            nodeZ.Color = Color.Red;
+            Console.WriteLine(FindMostColor(nodeL, nodeZ, 1));
         }
 
         /**
@@ -80,13 +108,12 @@ namespace LessThanColoring
         {
             int days = 0;
 
-            List<Node> passedNodes = new List<Node>() {};
+            List<Node> passedNodes = new List<Node>() { startNode };
             List<Node> tomorrowNodes = GetTomorrowNodes(startNode, passedNodes);
-
+            
             while (tomorrowNodes?.Count > 0)
             {
                 days++;
-                passedNodes.AddRange(tomorrowNodes);
                 tomorrowNodes = GetTomorrowNodes(tomorrowNodes, passedNodes);
             }
 
@@ -107,7 +134,10 @@ namespace LessThanColoring
 
         private static List<Node> GetTomorrowNodes(Node node, List<Node> passedNodes)
         {
-            return node.Neighbours.Except(passedNodes).Where(n => n.Power <= node.Power).ToList();
+            var nodes = node.Neighbours.Except(passedNodes).Where(n => n.Power <= node.Power).ToList();
+            passedNodes.AddRange(nodes);
+
+            return nodes;
         }
 
         /**
@@ -138,20 +168,16 @@ namespace LessThanColoring
          */
         public static Color FindMostColor(Node node1, Node node2, int coloringDuration)
         {
-            List<Node> passedNodesFrom1 = new List<Node>() { };
-            List<Node> passedNodesFrom2 = new List<Node>() { };
+            List<Node> passedNodesFrom1 = new List<Node>() { node1 };
+            List<Node> passedNodesFrom2 = new List<Node>() { node2 };
 
+            List<Node> tomorrowNodesFrom1 = new List<Node>() { node1 };
+            List<Node> tomorrowNodesFrom2 = new List<Node>() { node2 };
 
-            List<Node> tomorrowNodesFrom1 = GetAndColoringTomorrowNodes(node1, passedNodesFrom1);
-            List<Node> tomorrowNodesFrom2 = GetAndColoringTomorrowNodes(node2, passedNodesFrom2);
-
-            for(int i=1; i < coloringDuration; i++)
-            {       
+            for (int i=0; i < coloringDuration; i++)
+            {
                 tomorrowNodesFrom1 = GetAndColoringTomorrowNodes(tomorrowNodesFrom1, passedNodesFrom1);
-                passedNodesFrom1.AddRange(tomorrowNodesFrom1);
-
                 tomorrowNodesFrom2 = GetAndColoringTomorrowNodes(tomorrowNodesFrom2, passedNodesFrom2);
-                passedNodesFrom2.AddRange(tomorrowNodesFrom2);
             }
 
             passedNodesFrom1.AddRange(passedNodesFrom2);
@@ -170,12 +196,13 @@ namespace LessThanColoring
 
             foreach (Node node in todayNodes)
             {
-                tomorrowNodes.AddRange(GetAndColoringTomorrowNodes(node, passedNodes));
+                List<Node> nodes = GetAndColoringTomorrowNodes(node, passedNodes);
+                tomorrowNodes.AddRange(nodes);
+                passedNodes.AddRange(nodes);
             }
 
             return tomorrowNodes;
         }
-
 
         private static List<Node> GetAndColoringTomorrowNodes(Node node, List<Node> passedNodes)
         {
