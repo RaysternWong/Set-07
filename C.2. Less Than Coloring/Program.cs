@@ -79,6 +79,13 @@ namespace LessThanColoring
             // AMEND YOUR CODE ABOVE THIS LINE
         }
 
+        public List<Node> GetNextDayNodes(Node node)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static int 
+
         /**
          * If we color 2 nodes at the same time then the color will spread for a certain period of time, find which color colored the most nodes.
          * Rule:

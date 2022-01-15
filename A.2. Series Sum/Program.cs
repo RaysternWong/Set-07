@@ -125,7 +125,7 @@ namespace SeriesSum
             }
             m--;
 
-            return m != 0 ? MultiSum(sum, m) : sum;
+            return m == 0 ? sum :MultiSum(sum, m);
         }
     }
 }

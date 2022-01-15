@@ -121,14 +121,14 @@ namespace BuyGame
  
             foreach (Student potentialBuyer in studentsAfforded)
             {
-                var friendsAfforded = (from friend in potentialBuyer.Friends
-                                       join studentAfforded in studentsAfforded on friend equals studentAfforded
-                                       select friend).ToList();
+                var friendsAffordedFullPrice = (from friend in potentialBuyer.Friends
+                                                join studentAfforded in studentsAfforded on friend equals studentAfforded
+                                                select friend).ToList();
 
-                if (friendsAfforded.Count >= 1)
+                if (friendsAffordedFullPrice.Count >= 1)
                 {
                     var friendAffordedHalfPrice = potentialBuyer.Friends
-                                                    .Except(friendsAfforded)
+                                                    .Except(friendsAffordedFullPrice)
                                                     .Except(invitedList)
                                                     .Where(x => x.AvailableMoney >= discountedPrice)
                                                     .OrderBy(x => x.AvailableMoney)
