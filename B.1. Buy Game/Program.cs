@@ -122,26 +122,22 @@ namespace BuyGame
 
             foreach (Student potentialBuyer in studentsAffordedFullPrice)
             {
-                if(potentialBuyer.Name == "Student J")
-                {
-
-                }
-
                 var friendsAffordedFullPrice = (from friend in potentialBuyer.Friends
                                                 join studentAfforded in studentsAffordedFullPrice on friend equals studentAfforded
                                                 select friend).ToList();
 
-                var friendAffordedHalfPrice = (from friend in potentialBuyer.Friends
-                                               join studentAfforded in studentsAffordedHalfPrice on friend equals studentAfforded
-                                               select friend)
-                                               .Except(invitedList)
-                                               .OrderBy(x => x.AvailableMoney).ToList();
-
-                if (friendsAffordedFullPrice?.Count >= 1 && friendAffordedHalfPrice?.Count >= 1)
+                var friendsAffordedHalfPrice = (from friend in potentialBuyer.Friends
+                                                join studentAfforded in studentsAffordedHalfPrice on friend equals studentAfforded
+                                                select friend)
+                                               .Except(invitedList).ToList();
+     
+                if (friendsAffordedFullPrice?.Count >= 1 && friendsAffordedHalfPrice?.Count >= 1)
                 {
+                    var fewestMoneyFrd = friendsAffordedHalfPrice.OrderBy(x => x.AvailableMoney).First();
+
                     buyers.Add(potentialBuyer);
-                    buyers.Add(friendAffordedHalfPrice.FirstOrDefault());
-                    invitedList.Add(friendAffordedHalfPrice.FirstOrDefault());
+                    buyers.Add(fewestMoneyFrd);
+                    invitedList.Add(fewestMoneyFrd);
                     continue;
                 }
                 if (friendsAffordedFullPrice?.Count >= 2)
