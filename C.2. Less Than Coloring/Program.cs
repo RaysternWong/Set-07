@@ -190,22 +190,16 @@ namespace LessThanColoring
 
         private static Color GetNewColor(Color currentColor, Color comingColor)
         {
-            switch(comingColor)
-            {
-                case Color.Blank: 
-                    break;
-                case Color.Mixed:
-                    currentColor = Color.Mixed; 
-                    break;     
-                default: 
-                    if (currentColor != comingColor)
-                    {
-                        currentColor = Color.Mixed;
-                    }
-                    break;
-            }
+            if (currentColor == comingColor)
+                return currentColor;
 
-            return currentColor;
+            if (currentColor == Color.Blank)
+                return comingColor;
+
+            if (comingColor == Color.Blank)
+                return currentColor;
+
+            return Color.Mixed;
         }
 
         private static List<Node> _GenerateGraphA()
