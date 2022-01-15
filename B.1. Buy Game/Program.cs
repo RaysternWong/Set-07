@@ -113,33 +113,40 @@ namespace BuyGame
          */
         public static List<Student> GetListPromoBuyers(List<Student> students, double gamePrice)
         {
-            List<Student> studentsAfforded = students.Where(x => x.AvailableMoney >= gamePrice).ToList();
+            double discountedPrice = gamePrice / 2;
+            List<Student> studentsAffordedFullPrice = students.Where(x => x.AvailableMoney >= gamePrice).ToList();
+            List<Student> studentsAffordedHalfPrice = students.Where(x => x.AvailableMoney >= discountedPrice && x.AvailableMoney < gamePrice).ToList();
             List<Student> buyers = new List<Student>();
             List<Student> invitedList = new List<Student>();
-            double discountedPrice = gamePrice / 2;
+        
 
- 
-            foreach (Student potentialBuyer in studentsAfforded)
+            foreach (Student potentialBuyer in studentsAffordedFullPrice)
             {
+                if(potentialBuyer.Name == "Student J")
+                {
+
+                }
+
                 var friendsAffordedFullPrice = (from friend in potentialBuyer.Friends
-                                                join studentAfforded in studentsAfforded on friend equals studentAfforded
+                                                join studentAfforded in studentsAffordedFullPrice on friend equals studentAfforded
                                                 select friend).ToList();
 
-                if (friendsAffordedFullPrice.Count >= 1)
-                {
-                    var friendAffordedHalfPrice = potentialBuyer.Friends
-                                                    .Except(friendsAffordedFullPrice)
-                                                    .Except(invitedList)
-                                                    .Where(x => x.AvailableMoney >= discountedPrice)
-                                                    .OrderBy(x => x.AvailableMoney)
-                                                    .FirstOrDefault();
+                var friendAffordedHalfPrice = (from friend in potentialBuyer.Friends
+                                               join studentAfforded in studentsAffordedHalfPrice on friend equals studentAfforded
+                                               select friend)
+                                               .Except(invitedList)
+                                               .OrderBy(x => x.AvailableMoney).ToList();
 
-                    if(friendAffordedHalfPrice != null)
-                    {
-                        buyers.Add(friendAffordedHalfPrice);
-                        buyers.Add(potentialBuyer);
-                        invitedList.Add(friendAffordedHalfPrice);          
-                    }            
+                if (friendsAffordedFullPrice?.Count >= 1 && friendAffordedHalfPrice?.Count >= 1)
+                {
+                    buyers.Add(potentialBuyer);
+                    buyers.Add(friendAffordedHalfPrice.FirstOrDefault());
+                    invitedList.Add(friendAffordedHalfPrice.FirstOrDefault());
+                    continue;
+                }
+                if (friendsAffordedFullPrice?.Count >= 2)
+                {
+                    buyers.Add(potentialBuyer);
                 }
             }
 
