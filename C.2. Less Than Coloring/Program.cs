@@ -197,8 +197,7 @@ namespace LessThanColoring
             foreach (Node node in todayNodes)
             {
                 List<Node> nodes = GetAndColoringTomorrowNodes(node, passedNodes);
-                tomorrowNodes.AddRange(nodes);
-                passedNodes.AddRange(nodes);
+                tomorrowNodes.AddRange(nodes);       
             }
 
             return tomorrowNodes;
@@ -211,6 +210,9 @@ namespace LessThanColoring
                 .Where(n => n.Power <= node.Power).ToList();
 
             tomorrowNode.ForEach(n => n.Color = GetNewColor(n.Color, node.Color));
+
+
+            passedNodes.AddRange(tomorrowNode);
 
             return tomorrowNode;
         }
